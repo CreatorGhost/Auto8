@@ -1,5 +1,6 @@
 import pyautogui
 import time
+import random
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -12,12 +13,17 @@ def open_browser():
     driver.get("https://www.google.com")
     return driver
 
+def type_like_human(element, text):
+    for char in text:
+        element.send_keys(char)
+        time.sleep(random.uniform(0.05, 0.2))  # Random delay between keystrokes
+
 def search_topic(driver, topic):
     search_box = driver.find_element(By.NAME, "q")
     search_box.clear()
-    search_box.send_keys(topic)
+    type_like_human(search_box, topic)
     search_box.send_keys(Keys.RETURN)
-    time.sleep(2)  # Wait for search results to load
+    time.sleep(random.uniform(2, 4))  # Random delay to simulate human waiting for results
 
 def select_search_result(driver, index):
     try:
@@ -39,16 +45,16 @@ def select_search_result(driver, index):
 
             # Click on the search result using pyautogui
             print(f"Clicking on search result {index} at position ({x}, {y}).")
-            pyautogui.moveTo(x, y)
+            pyautogui.moveTo(x, y, duration=random.uniform(0.1, 0.3))  # Move with a slight delay
             pyautogui.click()
-            time.sleep(2)  # Wait for the page to load
+            time.sleep(random.uniform(2, 4))  # Random delay to simulate human exploring the page
         else:
             print(f"Search result index {index} is out of range.")
     except Exception as e:
         print(f"An error occurred while selecting the search result: {e}")
 
 def scroll_through_page(driver):
-    scroll_pause_time = 1
+    scroll_pause_time = random.uniform(1, 3)  # Random delay between scrolls
     screen_height = driver.execute_script("return window.innerHeight;")
     scroll_height = driver.execute_script("return document.body.scrollHeight;")
     for i in range(0, scroll_height, screen_height):
@@ -57,7 +63,7 @@ def scroll_through_page(driver):
 
 def main():
     # List of topics to search
-    topics = ["Python programming", "Selenium automation"]
+    topics = ["Python programming", "Selenium automation", "PyAutoGUI usage"]
 
     # Open the browser
     driver = open_browser()
@@ -68,7 +74,7 @@ def main():
             select_search_result(driver, i)
             scroll_through_page(driver)
             driver.back()
-            time.sleep(2)  # Wait for the page to load
+            time.sleep(random.uniform(2, 4))  # Random delay to simulate human waiting for the page to load
 
     driver.quit()
 
