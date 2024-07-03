@@ -28,6 +28,7 @@ def search_topic(driver, topic):
 def select_search_result(driver, index):
     try:
         # Wait until the search results are present
+        print("Comming to search")
         WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "h3")))
         search_results = driver.find_elements(By.CSS_SELECTOR, "h3")
         print(f"Found {len(search_results)} search results.")
@@ -52,29 +53,49 @@ def select_search_result(driver, index):
             print(f"Search result index {index} is out of range.")
     except Exception as e:
         print(f"An error occurred while selecting the search result: {e}")
+        print(f"Exception type: {type(e).__name__}")
 
 def scroll_through_page(driver):
     scroll_pause_time = random.uniform(1, 3)  # Random delay between scrolls
     screen_height = driver.execute_script("return window.innerHeight;")
-    scroll_height = driver.execute_script("return document.body.scrollHeight;")
-    for i in range(0, scroll_height, screen_height):
-        pyautogui.scroll(-screen_height)
+    current_position = 0
+    i = 0
+
+    while True:
+        scroll_height = driver.execute_script("return document.body.scrollHeight;")
+        print(f"Current position: {current_position}, Scroll height: {scroll_height}, Screen height: {screen_height}")
+        
+        if current_position >= scroll_height:
+            print("Reached the bottom of the page.")
+            break
+        
+        # Scroll by a tenth of the screen height using JavaScript
+        driver.execute_script(f"window.scrollBy(0, {screen_height // 10});")
+        current_position += screen_height // 5
         time.sleep(scroll_pause_time)
+        i += 1
+        print(f"Scrolling.... {i}, Current position after scroll: {current_position} and the height is {scroll_height}")
+    
+    # Go back to the previous page after scrolling
+    driver.back()
+    print("Navigated back to the previous page.")
+
 
 def main():
     # List of topics to search
-    topics = ["Python programming", "Selenium automation", "PyAutoGUI usage"]
+    topics = ["Python for data science", "Selenium automation", "PyAutoGUI usage"]
 
     # Open the browser
     driver = open_browser()
 
     for topic in topics:
         search_topic(driver, topic)
-        for i in range(5):  # Click on the top 5 search results
+        for i in range(15):  # Click on the top 15 search results
             select_search_result(driver, i)
-            scroll_through_page(driver)
-            driver.back()
-            time.sleep(random.uniform(2, 4))  # Random delay to simulate human waiting for the page to load
+            # Check if the current URL is not the Google search results page
+            if "google.com/search" not in driver.current_url:
+                scroll_through_page(driver)
+                time.sleep(random.uniform(2, 4))  # Random delay to simulate human waiting for the page to load
 
     driver.quit()
 
